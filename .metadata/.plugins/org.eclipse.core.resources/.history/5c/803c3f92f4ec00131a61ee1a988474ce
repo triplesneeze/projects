@@ -1,0 +1,316 @@
+
+import java.util.Random;
+
+/**
+ *
+ * @author James Perry
+ */
+public class SudokuBoard {
+        
+   private int[][] startingBoard;
+   private int[][] finishedBoard;
+   public final static int SIZE = 9;
+
+    /**
+     * creates the 9x9 board
+     * the board is filled with a certain amount of numbers 
+     * this allows for different and more random boards
+     */
+    public SudokuBoard(){
+        //use a 9x9 arrt[9][9];  
+       startingBoard = new int[SIZE][SIZE];
+       finishedBoard = new int[SIZE][SIZE];
+       
+       Random r = new Random();
+       //int value = r.nextInt(9) + 1;
+       //startingBoard[0][0] = value;
+     //  finishedBoard[0][0] = value;
+           
+            Random ran = new Random();
+            //the value of what int i can go up to(this case i < 15) is the amount of number the sudoku board starts with.
+            //this can be changed for different randomness when building the board
+            
+            for(int i=0; i < 5; i++){
+                int rowSet = ran.nextInt(9);                
+                int colSet = ran.nextInt(9);
+                int numSet = ran.nextInt(9) + 1;
+                //if the random value corresponding to the numSet variable 
+                //cannot be legally placed in the randomly selected spot,
+                //one less cell on the board will be filled
+                //instead, the int i counter will just move on the next iteration
+                if(legal(rowSet, colSet, numSet, startingBoard)){
+                    startingBoard[rowSet][colSet] = numSet;
+                    finishedBoard[rowSet][colSet] = numSet;
+                }
+            }
+        }
+    
+    public SudokuBoard(int board[][]){
+        finishedBoard = board;
+    }
+    
+    /**
+     * Solves the board starting at the specified row and column
+     * 
+     * @param r -- the row
+     * @param c -- the column
+     * @return -- true is the board has been legally solve, or false if the board is unsolvable 
+     */
+    public boolean solve(int r, int c) {        
+        
+        if (r == 9) {
+            r = 0;            
+            if (++c == 9)
+                return true;
+        }
+        
+        if (finishedBoard[r][c] != 0){
+            return solve(r+1,c);
+        }
+        
+        for (int val = 1; val <= 9; ++val) {
+            if (legal(r,c,val,finishedBoard)) {                
+                finishedBoard[r][c] = val;
+
+                if (solve(r+1,c)){
+                    return true;
+                }
+            }
+        }
+
+        finishedBoard[r][c] = 0;
+       
+        return false;
+    }
+    
+    /**
+     * checks to see if the board has a legal solution
+     * @return
+     */
+    public boolean solvable(){
+        for(int r = 0; r < 9; r++){
+            for(int c = 0; c < 9; c++){
+                if(solve(r,c))
+                    return true;                
+           }
+        }
+        return false;
+    }
+    
+    public void setUpStartBoard(int difficulty){
+        Random ran = new Random();
+        for(int i = 0; i < difficulty; i++){
+            int r = ran.nextInt(9);            
+            int c = ran.nextInt(9);         
+            
+            startingBoard[r][c] = finishedBoard[r][c];
+        }
+    }
+    
+    public int[][] getStartingBoard(){
+        return startingBoard;
+    }
+    
+    
+    /**
+     * Checks to see that a number can legally be placed in a spot on the board
+     * @param r -- the row we want to place the number
+     * @param c -- the column we want to place the number
+     * ^^^THESE PARAMETERS SHOULD BE FROM 0-8
+     * @param num -- the number that we want to place
+     * ^^^THIS NUMBER SHOULD BE 1-9
+     * @param board -- the board to place the number in 
+     * MAYBE WE DON'T NEED THE BOARD AS A PARAMETER?
+     * MAYBE WE DON'T NEED THE BOARD AS A PARAMETER?
+     * @return
+     */
+    public boolean legal(int r, int c, int num, int[][] board) {
+        for (int k = 0; k < 9; ++k){
+            
+            if (num == board[k][c]){
+                return false;
+            }
+        }
+
+        for (int k = 0; k < 9; ++k){
+            if (num == board[r][k]){
+                return false;
+            }
+        }
+
+        int br = (r / 3)*3;
+        int bc = (c / 3)*3;
+        for (int k = 0; k < 3; ++k){
+            for (int m = 0; m < 3; ++m){
+                if (num == board[br+k][bc+m]){
+                    return false;
+                }
+            }
+        }
+        return true; 
+    } 
+    
+    /**
+     *Verifies that the board (when completely filled) is legal
+     */
+    public boolean verifyBoard(){        
+        /*
+         * This checks each row to see that a number does not appear twice
+         */
+        for (int r = 0; r < 9; r++){            
+            for(int c = 0; c < 9; c++){
+                int count = 0;
+                for(int num = 1; num < 10; num++){
+                    if(finishedBoard[r][c] == num){
+                        count++;
+                    }
+                    if(count > 1){
+                        return false;
+                    }
+                    count = 0;
+                }
+            }
+        }  
+        
+        /*
+         * This checks each column to see that a number does not appear twice
+         */
+        for (int r = 0; r < 9; ++r){
+            for(int c = 0; c < 9; c++){
+                int count = 0;
+                for(int num = 1; num < 10; num++){
+                    if(finishedBoard[c][r] == num){
+                        count++;
+                    }
+                    if(count > 1){
+                        return false;
+                    }
+                    count = 0;
+                }
+            }
+        }        
+     
+        /*
+         * This checks each of the 9 3x3 sections of the board
+         * to verify that a number only appears once
+         */
+        for(int r = 0; r< 9; r+=3){
+            for(int c = 0; c < 9; c+=3){ 
+                int br = (r / 3)*3;
+                int bc = (c / 3)*3;
+                for (int k = 0; k < 3; ++k){
+                    for (int m = 0; m < 3; ++m){
+                        int count = 0;
+                        for(int num = 1; num < 10; num++){
+                            if(finishedBoard[br+k][bc+m] == num){
+                                count++;
+                            }
+                            if(count > 1){
+                                return false;
+                            }
+                            count = 0; 
+                        }
+                    }
+                }
+            }   
+        }
+        
+        return true;
+    }
+
+    /**
+     * prints the board as a 9x9 grid 
+     */
+    public void printBoard(){
+       String s = new String();
+       s = "-------------";
+       System.out.println(s);
+       for(int r = 0; r < 9; r++){
+           for(int c = 0; c < 9; c++){
+               if((c)%3==0){
+                   System.out.print("|");
+               }
+              if(startingBoard[r][c] == 0){
+                  System.out.print(".");
+              }
+              else{
+               System.out.print(startingBoard[r][c]);
+              }
+           }
+           System.out.println("|");
+           if((r+1)%3==0){
+               System.out.println(s);
+           }
+       }
+   }
+    
+    public void printAnswer(){
+       String s = new String();
+       s = "-------------";
+       System.out.println(s);
+       for(int r = 0; r < 9; r++){
+           for(int c = 0; c < 9; c++){
+               if((c)%3==0){
+                   System.out.print("|");
+               }
+              if(finishedBoard[r][c] == 0){
+                  System.out.print(".");
+              }
+              else{
+               System.out.print(finishedBoard[r][c]);
+              }
+           }
+           System.out.println("|");
+           if((r+1)%3==0){
+               System.out.println(s);
+           }
+       }
+    }
+    
+      /**
+     * probs wont need
+     * @return the board
+     */
+    public int[][] getboard(){
+        return startingBoard;
+    }
+    
+    public int[][] getFinished(){
+        return finishedBoard;
+    }
+    
+    //this is used for testing
+    public void setboard(int[][] b){
+        startingBoard = b;
+    }
+    
+    //wont need
+    public void erase(){
+        startingBoard = new int[9][9];
+    }
+    
+    //probably wont need this
+    public static boolean compareBoards(SudokuBoard s1, SudokuBoard s2){
+        int[][] first = s1.getFinished();
+        int[][] second = s2.getFinished();
+        
+        for(int r = 0; r < 9; r++){
+            for(int c = 0; c < 9; c++){
+                if(first[r][c] != second[r][c]){
+                    return false;
+                }
+            }
+        }
+        
+        return true;
+    }
+    
+     
+    
+    
+    //DAS FIN 
+}
+        
+         
+ 
+

@@ -1,0 +1,49 @@
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JButton;
+import javax.swing.JTextField;
+
+/**
+ *
+ * @author Jesse
+ */
+public class CheckButton extends JButton implements ActionListener {
+    
+	Panel panel;
+        JTextField jtf;
+        
+
+	/**
+	 * Creates a new solve button.
+	 * 
+	 * @param sp
+	 *            the sudoku panel the button is going to interact with
+	 */
+	public CheckButton(Panel sp, JTextField jtf) {
+		super("CHECK SOLUTION");
+                this.jtf = jtf;
+		panel = sp;
+		addActionListener(this);
+                
+	}
+
+	/**
+	 * Called when the button is clicked.
+	 */
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+             
+		if(panel.verify()){
+                    
+                    jtf.setText("  RIGHT");
+                }
+                else{
+                    jtf.setText(" WRONG");
+                }
+                
+              
+	}
+        
+       
+}
